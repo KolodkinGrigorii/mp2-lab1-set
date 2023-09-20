@@ -8,6 +8,7 @@
 #include <limits>
 #include <iostream>
 #include "tbitfield.h"
+#include <math.h>
 
 TBitField::TBitField(size_t len)
 {
@@ -26,7 +27,6 @@ TBitField::TBitField(const TBitField &bf) // конструктор копиро
 {
     bitLen = bf.bitLen;
     memLen = bf.memLen;
-    delete[] pMem;
     pMem = new uint[memLen];
     for (int i = 0; i < memLen; i++) {
         pMem[i] = bf.pMem[i];
@@ -40,7 +40,7 @@ size_t TBitField::getIndex(const size_t n) const  // индекс в pМем д�
 
 uint TBitField::getMask(const size_t n) const // битовая маска для бита n
 {
-    return (1 << n);
+    return pow(2,n);
 }
 
 // доступ к битам битового поля
@@ -56,18 +56,27 @@ size_t TBitField::getNumBytes() const // получить количество �
 
 void TBitField::setBit(const size_t n) // установить бит
 {
+    if (n > bitLen) {
+        throw 'FALL';
+    }
     uint mask = getMask(getIndex(n));
     pMem[n / (sizeof(uint) * 8)] = pMem[n / (sizeof(uint) * 8)] | mask;
 }
 
 void TBitField::clrBit(const size_t n) // очистить бит
 {
+    if (n > bitLen) {
+        throw 'FALL';
+    }
     uint mask = ~getMask(getIndex(n));
-    pMem[n / (sizeof(uint) * 8)] = pMem[n / (sizeof(uint) * 8)] | mask;
+    pMem[n / (sizeof(uint) * 8)] = pMem[n / (sizeof(uint) * 8)] & mask;
 }
 
 bool TBitField::getBit(const size_t n) const // получить значение бита
 {
+    if (n > bitLen) {
+        throw 'FALL';
+    }
     uint pos = pMem[n / (sizeof(uint) * 8)];
     uint mask = getMask(getIndex(n));
     if (pos & mask) {
@@ -92,11 +101,21 @@ TBitField& TBitField::operator=(const TBitField &bf) // присваивание
 
 bool TBitField::operator==(const TBitField &bf) const // сравнение
 {
+    for (int i = 0; i < memLen; i++) {
+        if (pMem[i] != bf.pMem[i]) {
+            return false;
+        }
+    }
     return true;
 }
 
 bool TBitField::operator!=(const TBitField &bf) const // сравнение
 {
+    for (int i = 0; i < memLen; i++) {
+        if (pMem[i] != bf.pMem[i]) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -120,16 +139,29 @@ TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 
 TBitField TBitField::operator~() // отрицание
 {
-    TBitField b(bitLen);
-    for (int i = 0; i < memLen; i++) {
-        b.pMem[i] = ~pMem[i];
+    TBitField n(bitLen);
+    if (bitLen < sizeof(uint) * 8) {
+        int max = 0;
+        for (int i = 1; i <= sizeof(uint) * 8;i++) {
+            if ((n.pMem[0] & getMask(i) != 0) && i>max) {
+                max = i;
+            }
+        }
+        for (int i = 1; i <=max; i++) {
+            n.pMem[0] = n.pMem[0] ^ (getMask(getIndex(i)));
+        }
     }
-    return b;
+    else {
+    for (int i = 1; i < memLen; i++) {
+        n.pMem[i] = pMem[i];
+    }
+    }
+    return n;
 }
 
 TBitField::~TBitField()
 {
-
+    delete[] pMem;
 }
 
 // ввод/вывод
@@ -140,5 +172,12 @@ std::istream &operator>>(std::istream &istr, TBitField &bf) // ввод
 
 std::ostream &operator<<(std::ostream &ostr, const TBitField &bf) // вывод
 {
-    return ostr;
+    for (int i = bf.bitLen; i >= 0; i--) {
+        if (bf.pMem[i/sizeof(uint)*8] & bf.getMask(bf.getIndex(i))) {
+            return ostr << 1;
+        }
+        else {
+            return ostr << 0;
+        }
+    }
 }
