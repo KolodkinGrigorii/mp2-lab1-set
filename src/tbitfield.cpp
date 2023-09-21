@@ -140,21 +140,12 @@ TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 TBitField TBitField::operator~() // отрицание
 {
     TBitField n(bitLen);
-    if (bitLen < sizeof(uint) * 8) {
-        int max = 0;
-        for (int i = 1; i <= sizeof(uint) * 8;i++) {
-            if ((n.pMem[0] & getMask(i) != 0) && i>max) {
-                max = i;
-            }
-        }
-        for (int i = 1; i <=max; i++) {
-            n.pMem[0] = n.pMem[0] ^ (getMask(getIndex(i)));
-        }
+    for (int i = 0; i < memLen - 1; i++) {
+        n.pMem[i] = ~pMem[i];
     }
-    else {
-    for (int i = 1; i < memLen; i++) {
-        n.pMem[i] = pMem[i];
-    }
+    n.pMem[memLen - 1] = pMem[memLen - 1] ^ (getMask(getIndex(0)));
+    for (int i = 1; i < bitLen % 32; i++) {
+        n.pMem[memLen-1] = (n.pMem[memLen-1]) ^ (getMask(getIndex(i)));
     }
     return n;
 }
