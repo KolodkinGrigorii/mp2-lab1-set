@@ -56,7 +56,7 @@ size_t TBitField::getNumBytes() const // получить количество �
 
 void TBitField::setBit(const size_t n) // установить бит
 {
-    if (n > bitLen) {
+    if (n >= bitLen) {
         throw 'FALL';
     }
     elType mask = getMask(getIndex(n));
