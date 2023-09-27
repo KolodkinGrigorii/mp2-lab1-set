@@ -17,7 +17,7 @@
 
 int main()
 {
-    int n, m, k, count;
+    /*int n, m, k, count;
     setlocale(LC_ALL, "Russian");
     std::cout << "Тестирование программ поддержки битового поля" << std::endl;
     std::cout << "             Решето Эратосфена" << std::endl;
@@ -48,7 +48,7 @@ int main()
                 std::cout << std::endl;
          }
     std::cout << std::endl;
-    std::cout << "В первых " << n << " числах " << count << " простых" << std::endl;
+    std::cout << "В первых " << n << " числах " << count << " простых" << std::endl;*/
 }
 #else
 
