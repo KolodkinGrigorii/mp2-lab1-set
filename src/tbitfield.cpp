@@ -13,11 +13,11 @@
 TBitField::TBitField(size_t len)
 {
     bitLen = len;
-    if (len % (sizeof(uint) * 8) != 0)
-        memLen = len / (sizeof(uint) * 8) + 1;
+    if (len % (sizeof(elType) * 8) != 0)
+        memLen = len / (sizeof(elType) * 8) + 1;
     else
-        memLen = len / (sizeof(uint) * 8);
-    pMem = new uint[memLen];
+        memLen = len / (sizeof(elType) * 8);
+    pMem = new elType[memLen];
     for (int i = 0; i < memLen; i++) {
         pMem[i] = 0;
     }
@@ -27,7 +27,7 @@ TBitField::TBitField(const TBitField& bf) // конструктор копиро
 {
     bitLen = bf.bitLen;
     memLen = bf.memLen;
-    pMem = new uint[memLen];
+    pMem = new elType[memLen];
     for (int i = 0; i < memLen; i++) {
         pMem[i] = bf.pMem[i];
     }
@@ -35,23 +35,23 @@ TBitField::TBitField(const TBitField& bf) // конструктор копиро
 
 size_t TBitField::getIndex(const size_t n) const  // индекс в pМем для бита n
 {
-    return n % (sizeof(uint) * 8);
+    return n % (sizeof(elType) * 8);
 }
 
-uint TBitField::getMask(const size_t n) const // битовая маска для бита n
+elType TBitField::getMask(const size_t n) const // битовая маска для бита n
 {
     return pow(2, n);
 }
 
 // доступ к битам битового поля
-uint TBitField::getLength() const // получить длину (к-во битов)
+elType TBitField::getLength() const // получить длину (к-во битов)
 {
-    return (uint)bitLen;
+    return (elType)bitLen;
 }
 
 size_t TBitField::getNumBytes() const // получить количество байт выделенной памяти
 {
-    return memLen * sizeof(uint);
+    return memLen * sizeof(elType);
 }
 
 void TBitField::setBit(const size_t n) // установить бит
@@ -59,8 +59,8 @@ void TBitField::setBit(const size_t n) // установить бит
     if (n > bitLen) {
         throw 'FALL';
     }
-    uint mask = getMask(getIndex(n));
-    pMem[n / (sizeof(uint) * 8)] = pMem[n / (sizeof(uint) * 8)] | mask;
+    elType mask = getMask(getIndex(n));
+    pMem[n / (sizeof(elType) * 8)] = pMem[n / (sizeof(elType) * 8)] | mask;
 }
 
 void TBitField::clrBit(const size_t n) // очистить бит
@@ -68,8 +68,8 @@ void TBitField::clrBit(const size_t n) // очистить бит
     if (n > bitLen) {
         throw 'FALL';
     }
-    uint mask = ~getMask(getIndex(n));
-    pMem[n / (sizeof(uint) * 8)] = pMem[n / (sizeof(uint) * 8)] & mask;
+    elType mask = ~getMask(getIndex(n));
+    pMem[n / (sizeof(elType) * 8)] = pMem[n / (sizeof(elType) * 8)] & mask;
 }
 
 bool TBitField::getBit(const size_t n) const // получить значение бита
@@ -77,8 +77,8 @@ bool TBitField::getBit(const size_t n) const // получить значени�
     if (n > bitLen) {
         throw 'FALL';
     }
-    uint pos = pMem[n / (sizeof(uint) * 8)];
-    uint mask = getMask(getIndex(n));
+    elType pos = pMem[n / (sizeof(elType) * 8)];
+    elType mask = getMask(getIndex(n));
     if (pos & mask) {
         return true;
     }
@@ -92,7 +92,7 @@ TBitField& TBitField::operator=(const TBitField& bf) // присваивание
 {
     bitLen = bf.bitLen;
     memLen = bf.memLen;
-    pMem = new uint[memLen];
+    pMem = new elType[memLen];
     for (int i = 0; i < memLen; i++) {
         pMem[i] = bf.pMem[i];
     }
@@ -144,7 +144,7 @@ TBitField TBitField::operator~() // отрицание
         n.pMem[i] = ~pMem[i];
     }
     n.pMem[memLen - 1] = pMem[memLen - 1] ^ (getMask(getIndex(0)));
-    for (int i = 1; i < bitLen % (sizeof(uint)*8); i++) {
+    for (int i = 1; i < bitLen % (sizeof(elType)*8); i++) {
         n.pMem[memLen - 1] = (n.pMem[memLen - 1]) ^ (getMask(getIndex(i)));
     }
     return n;
@@ -164,7 +164,7 @@ std::istream& operator>>(std::istream& istr, TBitField& bf) // ввод
 std::ostream& operator<<(std::ostream& ostr, const TBitField& bf) // вывод
 {
     for (int i = bf.bitLen; i >= 0; i--) {
-        if (bf.pMem[i / sizeof(uint) * 8] & bf.getMask(bf.getIndex(i))) {
+        if (bf.pMem[i / sizeof(elType) * 8] & bf.getMask(bf.getIndex(i))) {
             return ostr << 1;
         }
         else {
